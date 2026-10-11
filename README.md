@@ -14,10 +14,11 @@
 
 ## Overview
 
-InnFlow is a headless booking engine and property management system designed exclusively for boutique hotels and luxury accommodations. It provides a seamless, cinematic guest experience while giving property owners a powerful suite of operational tools. 
+InnFlow is a full-stack hotel booking and property management application built with React, Node.js, Express, and MongoDB.
 
-By eliminating the friction of traditional hotel software, InnFlow solves the dual problem of modern hospitality: delivering a flawless digital booking journey while automating backend operations like inventory synchronization and contactless check-ins.
+The platform provides a guest-facing booking experience alongside an administrative dashboard for managing rooms and reservations. It includes date-based room availability queries, booking lifecycle management, JWT-based authentication, and QR-based guest check-in.
 
+The project focuses on backend workflow design, room availability validation, access control, and the integration of guest-facing and administrative interfaces.
 ---
 
 ## Preview
