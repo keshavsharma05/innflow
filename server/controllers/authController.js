@@ -11,11 +11,24 @@ if (isProd && !JWT_SECRET) {
 // Body: { phone, otp, mode: 'login'|'signup', name? }
 exports.verifyOTP = async (req, res) => {
   const { phone, otp, mode, name } = req.body;
-  if (!phone || !otp) return res.status(400).json({ message: 'Phone and OTP required' });
-  if (!mode) return res.status(400).json({ message: 'Mode (login/signup) is required' });
+  if (!phone || !otp){ 
+    return res.status(400).json({ 
+      message: 'Phone and OTP required' 
+    });
+  }
+  if (!mode){ 
+    return res.status(400).json({ 
+      message: 'Mode (login/signup) is required' 
+    });
+  }
 
   // Mock OTP — production must use a real provider.
-  if (otp !== '1234') return res.status(401).json({ success: false, message: 'Invalid OTP. Please try again.' });
+  if (otp !== '1234'){ 
+    return res.status(401).json({ 
+      success: false, 
+      message: 'Invalid OTP. Please try again.' 
+    });
+  }
 
   try {
     let user = await User.findOne({ phoneNumber: phone });
@@ -37,11 +50,16 @@ exports.verifyOTP = async (req, res) => {
         });
       }
       if (!name || !name.trim()) {
-        return res.status(400).json({ success: false, message: 'Name is required to sign up.' });
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Name is required to sign up.' 
+        });
       }
       user = await User.create({ phoneNumber: phone, name: name.trim(), role: 'USER' });
     } else {
-      return res.status(400).json({ message: 'Invalid mode. Use login or signup.' });
+      return res.status(400).json({ 
+        message: 'Invalid mode. Use login or signup.' 
+      });
     }
 
     const token = jwt.sign(
@@ -98,7 +116,10 @@ exports.adminLogin = (req, res) => {
   const adminPass = process.env.ADMIN_PASS;
 
   if (isProd && (!adminUser || !adminPass)) {
-    return res.status(503).json({ success: false, message: 'Admin auth not configured' });
+    return res.status(503).json({ 
+      success: false, 
+      message: 'Admin auth not configured' 
+    });
   }
 
   if (username === adminUser && password === adminPass) {
