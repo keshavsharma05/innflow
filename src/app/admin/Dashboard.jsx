@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useHotel } from '../../services/HotelContext';
 import { FaDollarSign, FaCalendarCheck, FaUsers } from 'react-icons/fa';
 import { getBookings, getRooms, updateBooking } from '../../services/api';
+import { AdminTableLoader, AdminStatsSkeleton } from './AdminLoadingState';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -19,6 +20,8 @@ const Dashboard = () => {
     ]).then(([bookingsData, roomsData]) => {
       setBookings(Array.isArray(bookingsData) ? bookingsData : []);
       setRooms(Array.isArray(roomsData) ? roomsData : []);
+      setLoading(false);
+    }).catch(() => {
       setLoading(false);
     });
   }, []);
@@ -71,32 +74,36 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <section className="stats-grid">
-        {stats.map((stat, i) => (
-          <div 
-            key={i} 
-            className="stat-card-v2"
-            style={{ '--accent-color': stat.color }}
-          >
-            <div className="stat-info-v2">
-              <span className="stat-label-v2">{stat.label}</span>
-              <h2 className="stat-value-v2">{stat.value}</h2>
-              {stat.label === "Total Revenue" ? (
-                <span className="stat-trend-v2" style={{ color: '#10b981' }}>
-                  {stat.trend} from last month
-                </span>
-              ) : (
-                <span className="stat-trend-v2" style={{ color: '#7a7068' }}>
-                  {stat.trend} metrics
-                </span>
-              )}
+      {loading ? (
+        <AdminStatsSkeleton count={3} />
+      ) : (
+        <section className="stats-grid">
+          {stats.map((stat, i) => (
+            <div 
+              key={i} 
+              className="stat-card-v2"
+              style={{ '--accent-color': stat.color }}
+            >
+              <div className="stat-info-v2">
+                <span className="stat-label-v2">{stat.label}</span>
+                <h2 className="stat-value-v2">{stat.value}</h2>
+                {stat.label === "Total Revenue" ? (
+                  <span className="stat-trend-v2" style={{ color: '#10b981' }}>
+                    {stat.trend} from last month
+                  </span>
+                ) : (
+                  <span className="stat-trend-v2" style={{ color: '#7a7068' }}>
+                    {stat.trend} metrics
+                  </span>
+                )}
+              </div>
+              <div className="stat-icon-v2" style={{ backgroundColor: stat.color + '15', color: stat.color }}>
+                {stat.icon}
+              </div>
             </div>
-            <div className="stat-icon-v2" style={{ backgroundColor: stat.color + '15', color: stat.color }}>
-              {stat.icon}
-            </div>
-          </div>
-        ))}
-      </section>
+          ))}
+        </section>
+      )}
 
       <section className="recent-activity-v2">
         <div className="card-header-v2">
@@ -118,11 +125,11 @@ const Dashboard = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-light)' }}>
-                    Loading...
-                  </td>
-                </tr>
+                <AdminTableLoader 
+                  colSpan={7} 
+                  message="Fetching property bookings..." 
+                  subtext="Calculating room metrics & financial overview" 
+                />
               ) : !Array.isArray(bookings) || bookings.length === 0 ? (
                 <tr>
                   <td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-light)' }}>

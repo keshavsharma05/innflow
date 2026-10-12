@@ -4,6 +4,7 @@ import AdminSidebar from './AdminSidebar';
 import { getBookings, createBooking, deleteBooking, getRooms, updateBooking } from '../../services/api';
 import { FaCheck, FaPlus, FaTimes, FaSearch, FaEllipsisV } from 'react-icons/fa';
 import { RiSearchLine, RiCustomerService2Line, RiCalendarCheckLine, RiInformationLine, RiArrowRightSLine } from 'react-icons/ri';
+import { AdminTableLoader } from './AdminLoadingState';
 import './ManageBookings.css';
 
 const ManageBookings = () => {
@@ -26,8 +27,11 @@ const ManageBookings = () => {
   }, [hotelId]);
 
   const fetchBookings = () => {
+    setLoading(true);
     getBookings().then(data => {
       setBookings(Array.isArray(data) ? data : []);
+      setLoading(false);
+    }).catch(() => {
       setLoading(false);
     });
   };
@@ -243,7 +247,13 @@ const ManageBookings = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredBookings.length === 0 ? (
+              {loading ? (
+                <AdminTableLoader 
+                  colSpan={8} 
+                  message="Fetching reservations..." 
+                  subtext="Loading guest details, room allocations & stay dates" 
+                />
+              ) : filteredBookings.length === 0 ? (
                 <tr><td colSpan="8" style={{textAlign: 'center', padding: '60px', color: '#a0aec0'}}>No reservations found matching your criteria.</td></tr>
               ) : (
                 filteredBookings.map(bk => (

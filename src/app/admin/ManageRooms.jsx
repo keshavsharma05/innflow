@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useHotel } from '../../services/HotelContext';
 import { getRooms, saveRoom, deleteRoom } from '../../services/api';
 import { FaPlus, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
+import { AdminTableLoader } from './AdminLoadingState';
 import './ManageRooms.css';
 
 const ManageRooms = () => {
   const { currentHotel, hotelId } = useHotel();
   const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
   const [formData, setFormData] = useState({
@@ -25,7 +27,13 @@ const ManageRooms = () => {
   }, [hotelId]);
 
   const fetchRooms = () => {
-    getRooms().then(setRooms);
+    setLoading(true);
+    getRooms().then(data => {
+      setRooms(Array.isArray(data) ? data : []);
+      setLoading(false);
+    }).catch(() => {
+      setLoading(false);
+    });
   };
 
   const handleOpenModal = (room = null) => {
@@ -95,9 +103,15 @@ const ManageRooms = () => {
               </tr>
             </thead>
             <tbody>
-              {rooms.length === 0 ? (
+              {loading ? (
+                <AdminTableLoader 
+                  colSpan={5} 
+                  message="Fetching room inventory..." 
+                  subtext="Loading room categories, assigned numbers and rates" 
+                />
+              ) : rooms.length === 0 ? (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-light)' }}>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-light)' }}>
                     No rooms found. Add a room to get started.
                   </td>
                 </tr>
