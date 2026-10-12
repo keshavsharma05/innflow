@@ -10,6 +10,15 @@ const AdminLayout = () => {
     return saved !== null ? saved === 'true' : true;
   });
 
+  useEffect(() => {
+    document.documentElement.classList.add('admin-html-no-scrollbar');
+    document.body.classList.add('admin-body-no-scrollbar');
+    return () => {
+      document.documentElement.classList.remove('admin-html-no-scrollbar');
+      document.body.classList.remove('admin-body-no-scrollbar');
+    };
+  }, []);
+
   const handleToggle = () => {
     setIsCollapsed(prev => {
       const next = !prev;

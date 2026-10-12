@@ -31,6 +31,7 @@
 
 html {
   /* Lenis handles smooth scrolling, so we remove scroll-behavior: smooth here */
+  scrollbar-gutter: stable;
 }
 
 body {

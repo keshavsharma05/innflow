@@ -34,3 +34,24 @@
     padding: 20px;
   }
 }
+
+/* ─── Scrollbar Suppression (Prevents Shrink / Expand Layout Shifts) ─── */
+html.admin-html-no-scrollbar,
+body.admin-body-no-scrollbar,
+.admin-container-v3,
+.admin-content-v3 {
+  scrollbar-gutter: stable;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html.admin-html-no-scrollbar::-webkit-scrollbar,
+body.admin-body-no-scrollbar::-webkit-scrollbar,
+.admin-container-v3::-webkit-scrollbar,
+.admin-content-v3::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
