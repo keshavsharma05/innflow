@@ -11,14 +11,14 @@
 
 .admin-content-v3 {
   flex: 1;
-  margin-left: 260px;
+  margin-left: 78px;
   overflow-x: hidden;
-  transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
+  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar-collapsed .admin-content-v3 {
-  margin-left: 78px;
+.admin-container-v3.sidebar-expanded .admin-content-v3 {
+  margin-left: 260px;
 }
 
 /* Ensure child pages have consistent spacing */

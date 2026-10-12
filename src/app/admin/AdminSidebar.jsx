@@ -22,19 +22,20 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
   };
 
   return (
-    <aside className={`admin-sidebar-minimal ${isCollapsed ? 'collapsed' : ''}`}>
+    <aside className={`admin-sidebar-minimal ${isCollapsed ? 'collapsed' : 'expanded'}`}>
       {/* Sleek Flush Circle Toggle Button */}
       <button 
-        className={`sidebar-toggle-btn-minimal ${isCollapsed ? 'collapsed' : ''}`} 
+        className={`sidebar-toggle-btn-minimal ${isCollapsed ? 'collapsed' : 'expanded'}`} 
         onClick={onToggle}
         aria-label="Toggle Sidebar"
+        title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
       >
         <RiArrowLeftSLine className="toggle-arrow-icon" />
       </button>
 
       {/* Brand Header */}
       <div className="sidebar-brand-minimal">
-        <div className="brand-emblem">
+        <div className="brand-emblem" title="Cozy Inn Hotel Management">
           <img 
             src="/images/hotel-property/logo.png" 
             alt="Logo" 
@@ -56,6 +57,7 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
         <NavLink 
           to={`/admin`} 
           end 
+          title="Dashboard"
           className={({ isActive }) => isActive ? 'nav-item-minimal active' : 'nav-item-minimal'}
         >
           <RiDashboardLine className="nav-icon" /> 
@@ -63,6 +65,7 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
         </NavLink>
         <NavLink 
           to={`/admin/rooms`} 
+          title="Rooms"
           className={({ isActive }) => isActive ? 'nav-item-minimal active' : 'nav-item-minimal'}
         >
           <RiHotelBedLine className="nav-icon" /> 
@@ -70,6 +73,7 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
         </NavLink>
         <NavLink 
           to={`/admin/bookings`} 
+          title="Bookings"
           className={({ isActive }) => isActive ? 'nav-item-minimal active' : 'nav-item-minimal'}
         >
           <RiCalendarCheckLine className="nav-icon" /> 
@@ -77,6 +81,7 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
         </NavLink>
         <NavLink 
           to={`/admin/scan-qr`} 
+          title="Check-In Scanner"
           className={({ isActive }) => isActive ? 'nav-item-minimal active' : 'nav-item-minimal'}
         >
           <MdQrCodeScanner className="nav-icon" /> 
@@ -87,7 +92,7 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
       {/* Footer */}
       <div className="sidebar-footer-minimal">
         {/* User profile */}
-        <div className={`user-card-minimal ${isCollapsed ? 'collapsed' : ''}`}>
+        <div className={`user-card-minimal ${isCollapsed ? 'collapsed' : ''}`} title="Admin Root Terminal">
           <div className="user-avatar-minimal">
             <RiShieldUserLine />
             <span className="status-dot-minimal"></span>
@@ -101,12 +106,12 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
         </div>
 
         <div className="footer-links-minimal">
-          <NavLink to={`/`} className="nav-item-minimal back-site-btn">
+          <NavLink to={`/`} title="View Live Site" className="nav-item-minimal back-site-btn">
             <RiHome4Line className="nav-icon" /> 
             {!isCollapsed && <span className="nav-label">View Live Site</span>}
           </NavLink>
           
-          <button className="logout-btn-minimal" onClick={handleLogout}>
+          <button className="logout-btn-minimal" title="Sign Out" onClick={handleLogout}>
             <RiLogoutBoxRLine className="nav-icon" /> 
             {!isCollapsed && <span className="nav-label">Sign Out</span>}
           </button>

@@ -1,26 +1,26 @@
 /* ===== ADMIN SIDEBAR — MINIMALIST & REFINED ===== */
 
 .admin-sidebar-minimal {
-  width: 260px;
+  width: 78px;
   background-color: #ffffff;
   color: #1c1917; /* Dark charcoal text */
   height: 100vh;
   position: fixed;
   top: 0;
   left: 0;
-  padding: 36px 20px 24px;
+  padding: 36px 14px 24px;
   display: flex;
   flex-direction: column;
   z-index: 1000;
   border-right: 1px solid #e7e5e0; /* Very clean, light neutral border */
-  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), padding 0.3s ease;
+  transition: width 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), padding 0.25s ease;
   overflow: visible;
 }
 
-/* Collapsed state */
-.admin-sidebar-minimal.collapsed {
-  width: 78px;
-  padding: 36px 14px 24px;
+/* Expanded state (only when explicitly toggled open) */
+.admin-sidebar-minimal.expanded {
+  width: 260px;
+  padding: 36px 20px 24px;
 }
 
 /* ─── Toggle Button (Sleek Flush Circle) ─── */
