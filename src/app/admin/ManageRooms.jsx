@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useHotel } from '../../services/HotelContext';
-import { getRooms, saveRoom, deleteRoom } from '../../services/api';
+import { useAdminData } from './AdminContext';
 import { FaPlus, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 import { AdminTableLoader } from './AdminLoadingState';
 import './ManageRooms.css';
 
 const ManageRooms = () => {
-  const { currentHotel, hotelId } = useHotel();
-  const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { currentHotel } = useHotel();
+  const { rooms, initialLoading, saveRoom, removeRoom } = useAdminData();
   const [showModal, setShowModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
   const [formData, setFormData] = useState({
@@ -19,22 +18,6 @@ const ManageRooms = () => {
     description: '',
     image: ''
   });
-
-  useEffect(() => {
-    if (hotelId) {
-      fetchRooms();
-    }
-  }, [hotelId]);
-
-  const fetchRooms = () => {
-    setLoading(true);
-    getRooms().then(data => {
-      setRooms(Array.isArray(data) ? data : []);
-      setLoading(false);
-    }).catch(() => {
-      setLoading(false);
-    });
-  };
 
   const handleOpenModal = (room = null) => {
     if (room) {
@@ -60,19 +43,15 @@ const ManageRooms = () => {
     setShowModal(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    saveRoom(formData).then(() => {
-      fetchRooms();
-      setShowModal(false);
-    });
+    await saveRoom(formData);
+    setShowModal(false);
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this room?')) {
-      deleteRoom(id).then(() => {
-        fetchRooms();
-      });
+      removeRoom(id);
     }
   };
 
@@ -103,7 +82,7 @@ const ManageRooms = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {initialLoading ? (
                 <AdminTableLoader 
                   colSpan={5} 
                   message="Fetching room inventory..." 

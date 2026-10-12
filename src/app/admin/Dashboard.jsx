@@ -1,30 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHotel } from '../../services/HotelContext';
+import { useAdminData } from './AdminContext';
 import { FaDollarSign, FaCalendarCheck, FaUsers } from 'react-icons/fa';
-import { getBookings, getRooms, updateBooking } from '../../services/api';
-import { AdminTableLoader, AdminStatsSkeleton } from './AdminLoadingState';
+import { AdminLoadingState } from './AdminLoadingState';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const { currentHotel } = useHotel();
-  const [bookings, setBookings] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { bookings, rooms, initialLoading, assignRoom } = useAdminData();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    Promise.all([
-      getBookings(),
-      getRooms()
-    ]).then(([bookingsData, roomsData]) => {
-      setBookings(Array.isArray(bookingsData) ? bookingsData : []);
-      setRooms(Array.isArray(roomsData) ? roomsData : []);
-      setLoading(false);
-    }).catch(() => {
-      setLoading(false);
-    });
-  }, []);
+  if (initialLoading) {
+    return (
+      <div className="dashboard-view">
+        <header className="admin-top-panel">
+          <div className="panel-title">
+            <h1>Dashboard Overview</h1>
+            <p>Welcome back, <strong>{currentHotel?.name || 'Hotel'} Manager</strong> — initializing management system</p>
+          </div>
+        </header>
+        <AdminLoadingState 
+          message="Preparing Executive Dashboard..." 
+          subtext="Fetching live reservations, room allocations and revenue overview" 
+        />
+      </div>
+    );
+  }
 
   const activeBookings = Array.isArray(bookings) ? bookings.filter(b => b.status !== 'Cancelled' && b.status !== 'Completed') : [];
   const roomsOccupied = activeBookings.reduce((sum, b) => sum + (b.numRooms || 1), 0);
@@ -54,15 +56,7 @@ const Dashboard = () => {
   ];
 
   const handleRoomAssignment = (id, newRoomNo) => {
-    updateBooking(id, { roomNo: newRoomNo }).then(() => {
-      Promise.all([
-        getBookings(),
-        getRooms()
-      ]).then(([bookingsData, roomsData]) => {
-        setBookings(Array.isArray(bookingsData) ? bookingsData : []);
-        setRooms(Array.isArray(roomsData) ? roomsData : []);
-      });
-    });
+    assignRoom(id, newRoomNo);
   };
 
   return (
@@ -74,9 +68,6 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {loading ? (
-        <AdminStatsSkeleton count={3} />
-      ) : (
         <section className="stats-grid">
           {stats.map((stat, i) => (
             <div 
@@ -103,7 +94,6 @@ const Dashboard = () => {
             </div>
           ))}
         </section>
-      )}
 
       <section className="recent-activity-v2">
         <div className="card-header-v2">
@@ -124,13 +114,7 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <AdminTableLoader 
-                  colSpan={7} 
-                  message="Fetching property bookings..." 
-                  subtext="Calculating room metrics & financial overview" 
-                />
-              ) : !Array.isArray(bookings) || bookings.length === 0 ? (
+              {!Array.isArray(bookings) || bookings.length === 0 ? (
                 <tr>
                   <td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-light)' }}>
                     No recent bookings for {currentHotel?.name || 'this hotel'}.

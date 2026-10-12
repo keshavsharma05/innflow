@@ -1,64 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useHotel } from '../../services/HotelContext';
-import AdminSidebar from './AdminSidebar';
-import { getBookings, createBooking, deleteBooking, getRooms, updateBooking } from '../../services/api';
+import { useAdminData } from './AdminContext';
 import { FaCheck, FaPlus, FaTimes, FaSearch, FaEllipsisV } from 'react-icons/fa';
 import { RiSearchLine, RiCustomerService2Line, RiCalendarCheckLine, RiInformationLine, RiArrowRightSLine } from 'react-icons/ri';
 import { AdminTableLoader } from './AdminLoadingState';
 import './ManageBookings.css';
 
 const ManageBookings = () => {
-  const { hotelId, currentHotel } = useHotel();
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { currentHotel } = useHotel();
+  const { 
+    bookings, 
+    initialLoading, 
+    updateBookingStatus, 
+    removeBooking, 
+    createBooking: addBooking 
+  } = useAdminData();
+
   const [filter, setFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  // OLD CODE
-  // const [showAssignModal, setShowAssignModal] = useState(false);
-  // NEW CODE
-  // showAssignModal removed
-  const [showAssignModal, setShowAssignModal] = useState(false); // keeping variable just in case, but unused
+  const [showAssignModal, setShowAssignModal] = useState(false);
   const [activeBooking, setActiveBooking] = useState(null);
-
-  useEffect(() => {
-    if (hotelId) {
-      fetchBookings();
-    }
-  }, [hotelId]);
-
-  const fetchBookings = () => {
-    setLoading(true);
-    getBookings().then(data => {
-      setBookings(Array.isArray(data) ? data : []);
-      setLoading(false);
-    }).catch(() => {
-      setLoading(false);
-    });
-  };
 
   const handleDelete = (id) => {
     if (window.confirm('Delete this booking?')) {
-      deleteBooking(id).then(fetchBookings);
+      removeBooking(id);
     }
   };
-
-  // OLD CODE
-  /*
-  const handleAssignSave = (bookingId, roomNumbers) => {
-    const roomStr = Array.isArray(roomNumbers) ? roomNumbers.join(', ') : roomNumbers;
-    updateBooking(bookingId, { roomNo: roomStr }).then(() => {
-      fetchBookings();
-      setShowAssignModal(false);
-    });
-  };
-  */
 
   const todayStr = new Date().toISOString().split('T')[0];
 
   const handleStatusUpdate = (id, newStatus) => {
-    updateBooking(id, { status: newStatus }).then(() => {
-      fetchBookings();
-    });
+    updateBookingStatus(id, newStatus);
   };
 
   const renderSmartAction = (bk) => {
@@ -153,13 +125,12 @@ const ManageBookings = () => {
       price: Number(newBooking.total) 
     }];
     
-    const res = await createBooking({ 
+    const res = await addBooking({ 
       ...newBooking, 
       details,
       numRooms: 1
     });
     if (res.success) {
-      fetchBookings();
       setShowForm(false);
       setNewBooking({ guest: '', type: '', roomNo: '', checkIn: '', checkOut: '', status: 'Booked', total: '', guests: 1, details: [] });
     } else {
@@ -247,7 +218,7 @@ const ManageBookings = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {initialLoading ? (
                 <AdminTableLoader 
                   colSpan={8} 
                   message="Fetching reservations..." 

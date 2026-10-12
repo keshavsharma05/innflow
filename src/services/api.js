@@ -42,30 +42,73 @@ const privateFetch = async (url, options = {}) => {
   return response.json();
 };
 
+// ─── In-Memory Cache for Admin & App Data ──────────────────────────────────────
+let _roomsCache = null;
+let _bookingsCache = null;
+let _roomsPromise = null;
+let _bookingsPromise = null;
+
+export const invalidateAdminCache = (type = 'all') => {
+  if (type === 'all' || type === 'rooms') {
+    _roomsCache = null;
+    _roomsPromise = null;
+  }
+  if (type === 'all' || type === 'bookings') {
+    _bookingsCache = null;
+    _bookingsPromise = null;
+  }
+};
+
 // ─── Rooms ────────────────────────────────────────────────────────────────────
 
-// Fetch all rooms for the single hotel (public, no auth needed)
-export const getRooms = async () => {
-  const response = await fetch(`${API_URL}/rooms/${HOTEL_ID}`);
-  if (!response.ok) return [];
-  const data = await response.json();
-  if (!Array.isArray(data)) return [];
-  return data.map(r => ({ ...r, id: r._id || r.id }));
+// Fetch all rooms for the single hotel (cached in memory)
+export const getRooms = async (forceRefresh = false) => {
+  if (!forceRefresh && _roomsCache) {
+    return _roomsCache;
+  }
+  if (!forceRefresh && _roomsPromise) {
+    return _roomsPromise;
+  }
+
+  _roomsPromise = (async () => {
+    try {
+      const response = await fetch(`${API_URL}/rooms/${HOTEL_ID}`);
+      if (!response.ok) return _roomsCache || [];
+      const data = await response.json();
+      if (!Array.isArray(data)) return _roomsCache || [];
+      const mapped = data.map(r => ({ ...r, id: r._id || r.id }));
+      _roomsCache = mapped;
+      return mapped;
+    } catch (err) {
+      console.error('[getRooms] Network error:', err);
+      return _roomsCache || [];
+    } finally {
+      _roomsPromise = null;
+    }
+  })();
+
+  return _roomsPromise;
 };
 
 // Save (create or update) a room — admin only
 export const saveRoom = async (roomData) => {
-  return privateFetch(`${API_URL}/rooms/${HOTEL_ID}`, {
+  invalidateAdminCache('rooms');
+  const res = await privateFetch(`${API_URL}/rooms/${HOTEL_ID}`, {
     method: 'POST',
     body: JSON.stringify(roomData)
   });
+  invalidateAdminCache('rooms');
+  return res;
 };
 
 // Delete a room by its MongoDB _id — admin only
 export const deleteRoom = async (id) => {
-  return privateFetch(`${API_URL}/rooms/${id}`, {
+  invalidateAdminCache('rooms');
+  const res = await privateFetch(`${API_URL}/rooms/${id}`, {
     method: 'DELETE'
   });
+  invalidateAdminCache('rooms');
+  return res;
 };
 
 // Lookup a single room by its _id from the full rooms list
@@ -95,10 +138,29 @@ export const getAvailableRoomsByCategory = async (checkIn, checkOut) => {
 
 // ─── Bookings ─────────────────────────────────────────────────────────────────
 
-export const getBookings = async () => {
-  const data = await privateFetch(`${API_URL}/bookings?hotelId=${HOTEL_ID}`);
-  if (data.error || !Array.isArray(data)) return [];
-  return data;
+export const getBookings = async (forceRefresh = false) => {
+  if (!forceRefresh && _bookingsCache) {
+    return _bookingsCache;
+  }
+  if (!forceRefresh && _bookingsPromise) {
+    return _bookingsPromise;
+  }
+
+  _bookingsPromise = (async () => {
+    try {
+      const data = await privateFetch(`${API_URL}/bookings?hotelId=${HOTEL_ID}`);
+      if (data.error || !Array.isArray(data)) return _bookingsCache || [];
+      _bookingsCache = data;
+      return data;
+    } catch (err) {
+      console.error('[getBookings] Network error:', err);
+      return _bookingsCache || [];
+    } finally {
+      _bookingsPromise = null;
+    }
+  })();
+
+  return _bookingsPromise;
 };
 
 export const getBookingById = async (id) => {
@@ -112,30 +174,42 @@ export const getUserBookings = async (phoneNumber) => {
 };
 
 export const createBooking = async (bookingData) => {
-  return privateFetch(`${API_URL}/bookings`, {
+  invalidateAdminCache('bookings');
+  const res = await privateFetch(`${API_URL}/bookings`, {
     method: 'POST',
     body: JSON.stringify({ ...bookingData, hotelId: HOTEL_ID })
   });
+  invalidateAdminCache('bookings');
+  return res;
 };
 
 export const deleteBooking = async (id) => {
-  return privateFetch(`${API_URL}/bookings/${id}`, {
+  invalidateAdminCache('bookings');
+  const res = await privateFetch(`${API_URL}/bookings/${id}`, {
     method: 'DELETE'
   });
+  invalidateAdminCache('bookings');
+  return res;
 };
 
 export const updateBooking = async (id, data) => {
-  return privateFetch(`${API_URL}/bookings/${id}`, {
+  invalidateAdminCache('bookings');
+  const res = await privateFetch(`${API_URL}/bookings/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(data)
   });
+  invalidateAdminCache('bookings');
+  return res;
 };
 
 export const scanBookingQR = async (qrData) => {
-  return privateFetch(`${API_URL}/bookings/scan-qr`, {
+  invalidateAdminCache('bookings');
+  const res = await privateFetch(`${API_URL}/bookings/scan-qr`, {
     method: 'POST',
     body: JSON.stringify({ qrData })
   });
+  invalidateAdminCache('bookings');
+  return res;
 };
 
 // ─── Auth ───────────────────────────────────────────────────────────────────────
